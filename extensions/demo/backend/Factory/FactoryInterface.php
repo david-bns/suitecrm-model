@@ -8,6 +8,9 @@ interface FactoryInterface
 {
     /**
      * Field values for one fake record; $attributes override the defaults.
+     *
+     * @param array<string, mixed> $attributes
+     * @return array<string, mixed>
      */
     public function make(SeedContext $context, array $attributes = []): array;
 }

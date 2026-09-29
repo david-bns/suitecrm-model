@@ -29,6 +29,19 @@ RUN a2enmod rewrite headers expires
 COPY --from=composer:2.8.12 /usr/bin/composer /usr/local/bin/composer
 ENV COMPOSER_HOME=/tmp/composer
 
+# Static analysis (config: phpstan.neon), kept out of the project's dependencies
+# so vendor/ stays a --no-dev install
+RUN mkdir /opt/phpstan && cd /opt/phpstan \
+    && export COMPOSER_HOME=/tmp/composer-build \
+    && echo "{}" > composer.json \
+    && composer config --no-interaction allow-plugins.phpstan/extension-installer true \
+    && composer require --no-interaction --no-progress \
+        phpstan/phpstan:2.2.16 \
+        phpstan/phpstan-symfony:2.0.20 \
+        phpstan/extension-installer:1.4.3 \
+    && rm -rf /tmp/composer-build \
+    && ln -s /opt/phpstan/vendor/bin/phpstan /usr/local/bin/phpstan
+
 COPY apache/vhost.conf /etc/apache2/sites-available/000-default.conf
 COPY php/php.ini /usr/local/etc/php/conf.d/zz-suitecrm.ini
 

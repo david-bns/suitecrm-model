@@ -21,6 +21,9 @@ class SeedContext
     /** @var array<string, int> records created per module */
     public array $created = [];
 
+    /**
+     * @param array{users: int, accounts: int, leads: int} $options
+     */
     public function __construct(
         public readonly Generator $faker,
         public readonly array $options,
@@ -28,6 +31,9 @@ class SeedContext
     ) {
     }
 
+    /**
+     * @param array<string, mixed> $fields
+     */
     public function create(string $module, array $fields): SugarBean
     {
         $bean = BeanFactory::newBean($module);
@@ -44,6 +50,9 @@ class SeedContext
         return $bean;
     }
 
+    /**
+     * @param string[] $ids
+     */
     public function link(SugarBean $bean, string $link, array $ids): void
     {
         if ($ids === [] || !$bean->load_relationship($link)) {
@@ -55,6 +64,8 @@ class SeedContext
 
     /**
      * Keys of a dropdown list, empty option excluded, so values are always valid.
+     *
+     * @return string[]
      */
     public function options(string $list): array
     {

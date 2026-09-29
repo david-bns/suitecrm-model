@@ -29,6 +29,8 @@ final class FrenchCities
 
     /**
      * Address fields with the given prefix (billing_address, primary_address).
+     *
+     * @return array<string, string>
      */
     public static function address(Generator $faker, string $prefix): array
     {
