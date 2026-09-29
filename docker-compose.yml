@@ -28,6 +28,10 @@ services:
     <<: *app
     container_name: ${PROJECT_NAME:-suitecrm-model}
     restart: unless-stopped
+    environment:
+      # Traefik container name on the proxy network: loopback:443 is relayed to it
+      # so PHP can call https://${PROJECT_HOST:-suitecrm-model.localhost} (see .docker/php/entrypoint.sh)
+      PROXY_HOST: ${PROXY_HOST:-traefik}
     networks:
       - platform
       - internal

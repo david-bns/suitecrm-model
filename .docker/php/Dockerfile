@@ -20,9 +20,18 @@ ARG GID=1000
 RUN groupmod -o -g ${GID} www-data \
     && usermod -o -u ${UID} -g ${GID} www-data
 
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends socat \
+    && rm -rf /var/lib/apt/lists/*
+
 RUN a2enmod rewrite headers expires
 
 COPY apache/vhost.conf /etc/apache2/sites-available/000-default.conf
 COPY php/php.ini /usr/local/etc/php/conf.d/zz-suitecrm.ini
 
+COPY --chmod=0755 php/entrypoint.sh /usr/local/bin/suitecrm-entrypoint
+
 WORKDIR /var/www/html
+
+ENTRYPOINT ["suitecrm-entrypoint"]
+CMD ["apache2-foreground"]
