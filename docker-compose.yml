@@ -2,8 +2,10 @@
 # Prerequisite: the proxy is running (network `docker-proxy_proxy`); after adding a hostname,
 # run `make cert@sync` there so the certificate covers it.
 #
-#   docker compose up -d --build                              # defaults below
-#   docker compose --env-file .docker/.env up -d --build      # custom values (.docker/.env.example)
+# Configuration lives in the root .env (###> docker ### block), read automatically.
+#
+#   docker compose up -d --build
+#   docker compose exec -u www-data app .docker/install.sh    # first install
 #
 # -> https://suitecrm-model.localhost
 
@@ -32,6 +34,14 @@ services:
       # Traefik container name on the proxy network: loopback:443 is relayed to it
       # so PHP can call https://${PROJECT_HOST:-suitecrm-model.localhost} (see .docker/php/entrypoint.sh)
       PROXY_HOST: ${PROXY_HOST:-traefik}
+      # Install parameters (.docker/install.sh)
+      DB_NAME: ${DB_NAME:-suitecrm}
+      DB_USER: ${DB_USER:-suitecrm}
+      DB_PASSWORD: ${DB_PASSWORD:-suitecrm}
+      SITE_URL: https://${PROJECT_HOST:-suitecrm-model.localhost}
+      SUITECRM_ADMIN_USER: ${SUITECRM_ADMIN_USER:-admin}
+      SUITECRM_ADMIN_PASSWORD: ${SUITECRM_ADMIN_PASSWORD:-admin}
+      SUITECRM_DEMO_DATA: ${SUITECRM_DEMO_DATA:-no}
     networks:
       - platform
       - internal
