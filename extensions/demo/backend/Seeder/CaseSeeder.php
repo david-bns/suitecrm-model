@@ -21,10 +21,10 @@ class CaseSeeder implements SeederInterface
         foreach ($context->accounts as ['account' => $account, 'contacts' => $contacts]) {
             for ($i = 0, $n = $faker->numberBetween(0, 2); $i < $n; $i++) {
                 $case = $context->create('Cases', $this->cases->make($context, [
-                    'account_id' => $account->id,
-                    'assigned_user_id' => $context->randomUser()->id,
+                    'account_id' => SeedContext::id($account),
+                    'assigned_user_id' => SeedContext::id($context->randomUser()),
                 ]));
-                $context->link($case, 'contacts', [$faker->randomElement($contacts)->id]);
+                $context->link($case, 'contacts', [SeedContext::id($context->one($contacts))]);
             }
         }
     }

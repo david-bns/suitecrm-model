@@ -5,6 +5,8 @@ namespace App\Extension\demo\backend\Command;
 use App\Extension\demo\backend\LegacyHandler\DemoLegacyHandler;
 use App\Extension\demo\backend\Service\DemoRecordTracker;
 use BeanFactory;
+use LogicException;
+use SugarBean;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\ArrayInput;
@@ -50,7 +52,7 @@ class ResetCommand extends Command
             // Newest first: activities and links go before the accounts and users they point to.
             foreach ($records as ['module' => $module, 'record_id' => $id]) {
                 $bean = BeanFactory::getBean($module, $id);
-                if ($bean !== false && !empty($bean->id)) {
+                if ($bean instanceof SugarBean && !empty($bean->id)) {
                     $bean->mark_deleted($id);
                 }
             }
@@ -75,6 +77,11 @@ class ResetCommand extends Command
             $arguments['--seed'] = $input->getOption('faker-seed');
         }
 
-        return $this->getApplication()->find('demo:seed')->run(new ArrayInput($arguments), $output);
+        $application = $this->getApplication();
+        if ($application === null) {
+            throw new LogicException('demo:reset --seed must run from the console application.');
+        }
+
+        return $application->find('demo:seed')->run(new ArrayInput($arguments), $output);
     }
 }

@@ -27,14 +27,14 @@ class UserFactory implements FactoryInterface
             'user_name' => $userName,
             'first_name' => $firstName,
             'last_name' => $lastName,
-            'title' => $faker->randomElement(self::TITLES),
+            'title' => $context->one(self::TITLES),
             'department' => 'Commercial',
             'status' => 'Active',
             'employee_status' => 'Active',
             'is_admin' => 0,
             'email1' => $userName . '@example.com',
             'phone_work' => $faker->phoneNumber(),
-            'phone_mobile' => $faker->mobileNumber(),
+            'phone_mobile' => $context->fake('mobileNumber'),
         ], $attributes);
     }
 }

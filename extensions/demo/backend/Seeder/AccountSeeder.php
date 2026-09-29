@@ -20,21 +20,24 @@ class AccountSeeder implements SeederInterface
     public function run(SeedContext $context): void
     {
         for ($i = 0; $i < $context->options['accounts']; $i++) {
-            $owner = $context->randomUser();
+            $ownerId = SeedContext::id($context->randomUser());
             $account = $context->create('Accounts', $this->accounts->make($context, [
-                'assigned_user_id' => $owner->id,
+                'assigned_user_id' => $ownerId,
             ]));
 
-            $domain = substr(strrchr($account->email1, '@'), 1);
-            $contacts = [];
-            for ($j = 0, $n = $context->faker->numberBetween(1, 4); $j < $n; $j++) {
-                $contacts[] = $context->create('Contacts', $this->contacts->make($context, [
-                    '_domain' => $domain,
-                    'assigned_user_id' => $owner->id,
-                ]));
+            $email = SeedContext::field($account, 'email1');
+            $contactFields = [
+                '_domain' => substr($email, (int) strrpos($email, '@') + 1),
+                'assigned_user_id' => $ownerId,
+            ];
+
+            // The first contact outside the loop: an account always has one.
+            $contacts = [$context->create('Contacts', $this->contacts->make($context, $contactFields))];
+            for ($j = 1, $n = $context->faker->numberBetween(1, 4); $j < $n; $j++) {
+                $contacts[] = $context->create('Contacts', $this->contacts->make($context, $contactFields));
             }
 
-            $context->link($account, 'contacts', array_map(static fn ($c) => $c->id, $contacts));
+            $context->link($account, 'contacts', SeedContext::ids($contacts));
             $context->accounts[] = ['account' => $account, 'contacts' => $contacts];
         }
     }

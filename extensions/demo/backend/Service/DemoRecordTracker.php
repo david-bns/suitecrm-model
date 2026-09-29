@@ -39,13 +39,22 @@ class DemoRecordTracker
     }
 
     /**
-     * @return array<int, array{module: string, record_id: string}> newest first
+     * @return list<array{module: string, record_id: string}> newest first
      */
     public function all(): array
     {
-        return $this->connection->fetchAllAssociative(
+        $rows = $this->connection->fetchAllAssociative(
             'SELECT module, record_id FROM ' . self::TABLE . ' ORDER BY id DESC'
         );
+
+        $records = [];
+        foreach ($rows as $row) {
+            if (is_string($row['module'] ?? null) && is_string($row['record_id'] ?? null)) {
+                $records[] = ['module' => $row['module'], 'record_id' => $row['record_id']];
+            }
+        }
+
+        return $records;
     }
 
     public function clear(): void

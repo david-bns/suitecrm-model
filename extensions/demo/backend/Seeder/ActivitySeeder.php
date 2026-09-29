@@ -24,28 +24,30 @@ class ActivitySeeder implements SeederInterface
         $faker = $context->faker;
 
         foreach ($context->accounts as ['account' => $account, 'contacts' => $contacts]) {
+            $ownerId = SeedContext::field($account, 'assigned_user_id');
+
             for ($i = 0, $n = $faker->numberBetween(1, 5); $i < $n; $i++) {
-                $contact = $faker->randomElement($contacts);
+                $contactId = SeedContext::id($context->one($contacts));
                 $parent = [
                     'parent_type' => 'Accounts',
-                    'parent_id' => $account->id,
-                    'assigned_user_id' => $account->assigned_user_id,
+                    'parent_id' => SeedContext::id($account),
+                    'assigned_user_id' => $ownerId,
                 ];
 
-                switch ($faker->randomElement(['Calls', 'Meetings', 'Tasks'])) {
+                switch ($context->one(['Calls', 'Meetings', 'Tasks'])) {
                     case 'Calls':
                         $call = $context->create('Calls', $this->calls->make($context, $parent));
-                        $context->link($call, 'contacts', [$contact->id]);
-                        $context->link($call, 'users', [$account->assigned_user_id]);
+                        $context->link($call, 'contacts', [$contactId]);
+                        $context->link($call, 'users', [$ownerId]);
                         break;
                     case 'Meetings':
                         $meeting = $context->create('Meetings', $this->meetings->make($context, $parent));
-                        $context->link($meeting, 'contacts', [$contact->id]);
-                        $context->link($meeting, 'users', [$account->assigned_user_id]);
+                        $context->link($meeting, 'contacts', [$contactId]);
+                        $context->link($meeting, 'users', [$ownerId]);
                         break;
                     default:
                         $context->create('Tasks', $this->tasks->make($context, $parent + [
-                            'contact_id' => $contact->id,
+                            'contact_id' => $contactId,
                         ]));
                 }
             }

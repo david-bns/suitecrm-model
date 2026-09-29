@@ -3,6 +3,7 @@
 namespace App\Extension\demo\backend\LegacyHandler;
 
 use App\Engine\LegacyHandler\LegacyHandler;
+use App\Extension\demo\backend\Service\LegacyGlobals;
 
 /**
  * Boots the legacy application from the console so seeders can save beans
@@ -21,11 +22,10 @@ class DemoLegacyHandler extends LegacyHandler
         $this->runLegacyEntryPoint();
         $this->loadSystemUser();
 
-        global $sugar_config, $current_language, $app_strings, $app_list_strings;
-
-        $current_language = $sugar_config['default_language'] ?? 'en_us';
-        $app_strings = return_application_language($current_language);
-        $app_list_strings = return_app_list_strings_language($current_language);
+        $language = LegacyGlobals::defaultLanguage();
+        $GLOBALS['current_language'] = $language;
+        $GLOBALS['app_strings'] = return_application_language($language);
+        $GLOBALS['app_list_strings'] = return_app_list_strings_language($language);
     }
 
     public function stop(): void

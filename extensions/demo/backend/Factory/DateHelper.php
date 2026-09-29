@@ -26,7 +26,7 @@ final class DateHelper
     public static function officeHours(Generator $faker, DateTimeInterface $date, int $hour): string
     {
         $day = gmdate('Y-m-d', $date->getTimestamp());
-        $minutes = $faker->randomElement([0, 15, 30, 45]);
+        $minutes = $faker->numberBetween(0, 3) * 15;
 
         return sprintf('%s %02d:%02d:00', $day, $hour, $minutes);
     }
@@ -35,6 +35,6 @@ final class DateHelper
     {
         $ascii = iconv('UTF-8', 'ASCII//TRANSLIT', $value) ?: $value;
 
-        return trim(preg_replace('/[^a-z0-9]+/', '-', strtolower($ascii)), '-');
+        return trim(preg_replace('/[^a-z0-9]+/', '-', strtolower($ascii)) ?? '', '-');
     }
 }

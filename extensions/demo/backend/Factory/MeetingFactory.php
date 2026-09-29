@@ -21,11 +21,11 @@ class MeetingFactory implements FactoryInterface
         $past = $date->getTimestamp() < time();
 
         return array_merge([
-            'name' => $faker->randomElement(self::SUBJECTS),
+            'name' => $context->one(self::SUBJECTS),
             'date_start' => DateHelper::officeHours($faker, $date, $faker->numberBetween(7, 14)),
             'duration_hours' => 1,
-            'duration_minutes' => $faker->randomElement([0, 30]),
-            'location' => $faker->randomElement(['Visioconférence', 'Dans nos locaux', FrenchCities::pick($faker)[0]]),
+            'duration_minutes' => $context->one([0, 30]),
+            'location' => $context->one(['Visioconférence', 'Dans nos locaux', FrenchCities::pick($faker)[0]]),
             'status' => $past ? 'Held' : 'Planned',
             'description' => $faker->realText(100),
         ], $attributes);

@@ -22,20 +22,21 @@ class ContactFactory implements FactoryInterface
     public function make(SeedContext $context, array $attributes = []): array
     {
         $faker = $context->faker;
-        $gender = $faker->randomElement(['male', 'female']);
+        $gender = $context->one(['male', 'female']);
         $firstName = $faker->firstName($gender);
         $lastName = $faker->lastName();
-        $domain = $attributes['_domain'] ?? $faker->safeEmailDomain();
+        $domain = $attributes['_domain'] ?? null;
+        $domain = is_string($domain) ? $domain : $faker->safeEmailDomain();
         unset($attributes['_domain']);
 
         return array_merge([
             'salutation' => $gender === 'male' ? 'Mr.' : 'Ms.',
             'first_name' => $firstName,
             'last_name' => $lastName,
-            'title' => $faker->randomElement(self::TITLES),
-            'department' => $faker->randomElement(self::DEPARTMENTS),
+            'title' => $context->one(self::TITLES),
+            'department' => $context->one(self::DEPARTMENTS),
             'phone_work' => $faker->phoneNumber(),
-            'phone_mobile' => $faker->mobileNumber(),
+            'phone_mobile' => $context->fake('mobileNumber'),
             'email1' => DateHelper::slug($firstName) . '.' . DateHelper::slug($lastName) . '@' . $domain,
             'lead_source' => $context->pick('lead_source_dom'),
         ], FrenchCities::address($faker, 'primary_address'), $attributes);

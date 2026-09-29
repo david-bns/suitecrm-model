@@ -23,7 +23,7 @@ class CaseFactory implements FactoryInterface
         $status = $context->pick('case_status_dom');
 
         return array_merge([
-            'name' => $faker->randomElement(self::SUBJECTS),
+            'name' => $context->one(self::SUBJECTS),
             'status' => $status,
             // Status keys are prefixed by their state: Open_New, Closed_Closed...
             'state' => str_starts_with($status, 'Closed') ? 'Closed' : 'Open',

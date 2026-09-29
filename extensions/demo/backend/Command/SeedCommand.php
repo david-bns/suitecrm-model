@@ -9,6 +9,7 @@ use App\Extension\demo\backend\Service\SeedContext;
 use Faker\Factory;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Exception\InvalidOptionException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -44,10 +45,19 @@ class SeedCommand extends Command
             return Command::FAILURE;
         }
 
-        $options = [];
-        foreach (['users', 'accounts', 'leads'] as $name) {
-            $options[$name] = max(0, (int) $input->getOption($name));
+        try {
+            $options = [
+                'users' => self::count($input, 'users'),
+                'accounts' => self::count($input, 'accounts'),
+                'leads' => self::count($input, 'leads'),
+            ];
+            $seed = $input->getOption('seed') === null ? null : self::count($input, 'seed');
+        } catch (InvalidOptionException $e) {
+            $io->error($e->getMessage());
+
+            return Command::INVALID;
         }
+
         if ($options['users'] < 1 && $options['accounts'] + $options['leads'] > 0) {
             $io->error('At least one user is needed to assign the records to.');
 
@@ -55,8 +65,8 @@ class SeedCommand extends Command
         }
 
         $faker = Factory::create('fr_FR');
-        if ($input->getOption('seed') !== null) {
-            $faker->seed((int) $input->getOption('seed'));
+        if ($seed !== null) {
+            $faker->seed($seed);
         }
 
         $this->legacy->start();
@@ -80,5 +90,19 @@ class SeedCommand extends Command
         $io->success(sprintf('%d records created.', array_sum($context->created)));
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * A non-negative integer option: getOption() returns mixed.
+     */
+    private static function count(InputInterface $input, string $name): int
+    {
+        $value = $input->getOption($name);
+
+        if (!is_string($value) && !is_int($value) || filter_var($value, FILTER_VALIDATE_INT, ['options' => ['min_range' => 0]]) === false) {
+            throw new InvalidOptionException(sprintf('--%s must be a whole number, 0 or more.', $name));
+        }
+
+        return (int) $value;
     }
 }

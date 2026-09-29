@@ -1,9 +1,12 @@
 # Static analysis of the project's own code, not of SuiteCRM itself.
 #   docker compose exec -u www-data app vendor/bin/phpstan
 parameters:
-    level: 6
+    level: max
     paths:
         - extensions
+    excludePaths:
+        # SuiteCRM's sample extension, not our code
+        - extensions/defaultExt
     # Legacy classes (BeanFactory, SugarBean...) are not autoloaded by composer:
     # read them for symbols, without analysing them.
     scanDirectories:
@@ -13,10 +16,4 @@ parameters:
     # Beans get their fields as dynamic properties ($bean->email1...).
     universalObjectCratesClasses:
         - SugarBean
-    ignoreErrors:
-        # fr_FR formatters are reached through Generator::__call and missing from
-        # its @method list. Listed by name so a typo still gets reported.
-        -
-            identifier: method.notFound
-            message: '#^Call to an undefined method Faker\\Generator::(siret|siren|catchPhrase|mobileNumber)\(\)\.$#'
     tmpDir: cache/phpstan

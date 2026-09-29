@@ -21,11 +21,11 @@ class TaskFactory implements FactoryInterface
         $past = $due->getTimestamp() < time();
 
         return array_merge([
-            'name' => $faker->randomElement(self::SUBJECTS),
+            'name' => $context->one(self::SUBJECTS),
             'date_due' => DateHelper::officeHours($faker, $due, 16),
             'date_due_flag' => 0,
             'priority' => $context->pick('task_priority_dom'),
-            'status' => $past ? $faker->randomElement(['Completed', 'Completed', 'In Progress']) : 'Not Started',
+            'status' => $past ? $context->one(['Completed', 'Completed', 'In Progress']) : 'Not Started',
             'description' => $faker->realText(100),
         ], $attributes);
     }

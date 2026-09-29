@@ -24,7 +24,7 @@ final class FrenchCities
      */
     public static function pick(Generator $faker): array
     {
-        return $faker->randomElement(self::CITIES);
+        return self::CITIES[$faker->numberBetween(0, count(self::CITIES) - 1)];
     }
 
     /**

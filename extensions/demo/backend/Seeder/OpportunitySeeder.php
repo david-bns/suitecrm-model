@@ -19,18 +19,20 @@ class OpportunitySeeder implements SeederInterface
         $faker = $context->faker;
 
         foreach ($context->accounts as ['account' => $account, 'contacts' => $contacts]) {
+            $accountName = SeedContext::field($account, 'name');
+
             for ($i = 0, $n = $faker->numberBetween(0, 3); $i < $n; $i++) {
                 $fields = $this->opportunities->make($context, [
-                    'assigned_user_id' => $account->assigned_user_id,
+                    'assigned_user_id' => SeedContext::field($account, 'assigned_user_id'),
                 ]);
+                $project = is_string($fields['name'] ?? null) ? $fields['name'] : '';
                 // opportunities.name is 50 characters long
-                $fields['name'] = mb_strimwidth($fields['name'] . ' – ' . $account->name, 0, 50, '…');
+                $fields['name'] = mb_strimwidth($project . ' – ' . $accountName, 0, 50, '…');
 
                 $opportunity = $context->create('Opportunities', $fields);
-                $context->link($opportunity, 'accounts', [$account->id]);
-                $context->link($opportunity, 'contacts', array_map(
-                    static fn ($c) => $c->id,
-                    $faker->randomElements($contacts, $faker->numberBetween(1, count($contacts)))
+                $context->link($opportunity, 'accounts', [SeedContext::id($account)]);
+                $context->link($opportunity, 'contacts', SeedContext::ids(
+                    $context->some($contacts, $faker->numberBetween(1, count($contacts)))
                 ));
             }
         }

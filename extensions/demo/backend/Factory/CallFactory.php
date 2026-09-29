@@ -21,10 +21,10 @@ class CallFactory implements FactoryInterface
         $past = $date->getTimestamp() < time();
 
         return array_merge([
-            'name' => $faker->randomElement(self::SUBJECTS),
+            'name' => $context->one(self::SUBJECTS),
             'date_start' => DateHelper::officeHours($faker, $date, $faker->numberBetween(7, 15)),
             'duration_hours' => 0,
-            'duration_minutes' => $faker->randomElement([15, 30, 45]),
+            'duration_minutes' => $context->one([15, 30, 45]),
             'direction' => $context->pick('call_direction_dom'),
             'status' => $past ? 'Held' : 'Planned',
             'description' => $faker->realText(100),

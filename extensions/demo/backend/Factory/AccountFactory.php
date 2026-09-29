@@ -16,12 +16,12 @@ class AccountFactory implements FactoryInterface
             'name' => $name,
             'account_type' => $context->pick('account_type_dom'),
             'industry' => $context->pick('industry_dom'),
-            'employees' => (string) $faker->randomElement([5, 12, 25, 50, 120, 250, 800, 2000]),
+            'employees' => (string) $context->one([5, 12, 25, 50, 120, 250, 800, 2000]),
             'annual_revenue' => $faker->numberBetween(2, 500) * 100000 . ' €',
             'phone_office' => $faker->phoneNumber(),
             'website' => 'https://www.' . $domain,
             'email1' => 'contact@' . $domain,
-            'description' => $faker->catchPhrase() . "\nSIRET : " . $faker->siret(),
+            'description' => $context->fake('catchPhrase') . "\nSIRET : " . $context->fake('siret'),
         ], FrenchCities::address($faker, 'billing_address'), $attributes);
     }
 }

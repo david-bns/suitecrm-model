@@ -15,7 +15,7 @@ class LeadSeeder implements SeederInterface
     {
         for ($i = 0; $i < $context->options['leads']; $i++) {
             $context->create('Leads', $this->leads->make($context, [
-                'assigned_user_id' => $context->randomUser()->id,
+                'assigned_user_id' => SeedContext::id($context->randomUser()),
             ]));
         }
     }
