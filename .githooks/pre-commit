@@ -1,0 +1,37 @@
+#!/bin/sh
+# Run PHPStan and the unit tests before each commit that touches our PHP code.
+#
+# Hooks in this folder are versioned; enable them once per clone:
+#   git config core.hooksPath .githooks
+# Skip for one commit (e.g. containers stopped on purpose):
+#   git commit --no-verify
+
+# Staged PHP files (added, copied, modified, renamed) under the paths
+# phpstan.neon analyses. Nothing there: nothing to check.
+if ! git diff --cached --name-only --diff-filter=ACMR -- 'extensions/*.php' | grep -q .; then
+    exit 0
+fi
+
+# PHPStan (a dev dependency) runs in the app container.
+if ! docker compose ps --status running --services 2>/dev/null | grep -qx app; then
+    echo "pre-commit: the app container is not running, this commit cannot be checked." >&2
+    echo "Start it with 'docker compose up -d', or commit with --no-verify." >&2
+    exit 1
+fi
+
+echo "pre-commit: PHPStan..."
+
+# The whole of extensions/, not only the staged files: changing a method
+# signature breaks its callers, which may not be part of the commit.
+# -T: a hook has no TTY.
+if ! docker compose exec -T -u www-data app vendor/bin/phpstan analyse --no-progress --memory-limit=2G; then
+    echo "pre-commit: PHPStan found errors, commit aborted (--no-verify to bypass)." >&2
+    exit 1
+fi
+
+echo "pre-commit: PHPUnit..."
+
+if ! docker compose exec -T -u www-data app vendor/bin/phpunit --testsuite unit; then
+    echo "pre-commit: unit tests failed, commit aborted (--no-verify to bypass)." >&2
+    exit 1
+fi

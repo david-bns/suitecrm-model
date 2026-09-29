@@ -1,0 +1,56 @@
+#!/bin/sh
+# Enforce Conventional Commits on the subject line:
+#   type(scope)!: description
+#
+# Git calls this hook with the path of the file holding the message.
+# Hooks in this folder are versioned; enable them once per clone:
+#   git config core.hooksPath .githooks
+
+TYPES='feat|fix|refactor|perf|test|docs|build|ci|chore|style|revert'
+MAX_LENGTH=72
+
+# Drop what git itself strips: comment lines, and everything below the
+# scissors line of `git commit -v`.
+message=$(sed -e '/^# -\{8,\} >8 -\{8,\}$/,$d' -e '/^#/d' "$1")
+subject=$(printf '%s\n' "$message" | sed -n '1p')
+
+# Messages written by git itself.
+case "$subject" in
+    'Merge '* | 'Revert "'* | 'fixup! '* | 'squash! '* | 'amend! '*) exit 0 ;;
+esac
+
+fail() {
+    echo "commit-msg: $1" >&2
+    echo "  subject: $subject" >&2
+    echo "  expected: type(scope): description   (types: $(echo "$TYPES" | tr '|' ' '))" >&2
+    echo "  e.g.    : feat(demo): add a seeder for products" >&2
+    exit 1
+}
+
+if ! printf '%s\n' "$subject" | grep -Eq "^($TYPES)(\([a-z0-9._/-]+\))?!?: "; then
+    fail "the subject must start with a known type, an optional (scope) in lowercase, then ': '."
+fi
+
+description=${subject#*: }
+
+if [ -z "$description" ]; then
+    fail "the description after ': ' is empty."
+fi
+
+if printf '%s\n' "$description" | grep -Eq '^[A-Z]'; then
+    fail "the description must start in lowercase (imperative: 'add', not 'Add')."
+fi
+
+if printf '%s\n' "$description" | grep -Eq '\.$'; then
+    fail "no period at the end of the subject."
+fi
+
+# wc -m counts characters; ${#subject} would count bytes in dash (accents).
+length=$(printf '%s' "$subject" | wc -m)
+if [ "$length" -gt "$MAX_LENGTH" ]; then
+    fail "the subject is $length characters long, $MAX_LENGTH at most (details go in the body)."
+fi
+
+if [ -n "$(printf '%s\n' "$message" | sed -n '2p')" ]; then
+    fail "leave a blank line between the subject and the body."
+fi
