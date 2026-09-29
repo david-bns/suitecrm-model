@@ -1,0 +1,38 @@
+# Doctrine Migrations wired on the demo extension only (see config/migrations.php).
+# The stock Doctrine commands are reused under the demo: namespace.
+services:
+  # Same database as the default connection, without SuiteCRM's schema_filter
+  # (config/packages/doctrine.yaml hides every table but users and
+  # migration_versions from Doctrine, including the demo ones).
+  demo.dbal.connection:
+    class: Doctrine\DBAL\Connection
+    factory: ['Doctrine\DBAL\DriverManager', 'getConnection']
+    arguments: ["@=service('doctrine.dbal.default_connection').getParams()"]
+
+  demo.migrations.configuration:
+    class: Doctrine\Migrations\Configuration\Migration\PhpFile
+    arguments: ['%kernel.project_dir%/extensions/demo/config/migrations.php']
+
+  demo.migrations.connection:
+    class: Doctrine\Migrations\Configuration\Connection\ExistingConnection
+    arguments: ['@demo.dbal.connection']
+
+  demo.migrations.dependency_factory:
+    class: Doctrine\Migrations\DependencyFactory
+    factory: ['Doctrine\Migrations\DependencyFactory', 'fromConnection']
+    arguments: ['@demo.migrations.configuration', '@demo.migrations.connection']
+
+  demo.migrations.command.migrate:
+    class: Doctrine\Migrations\Tools\Console\Command\MigrateCommand
+    arguments: ['@demo.migrations.dependency_factory', 'demo:migrate']
+    tags: [{ name: console.command, command: 'demo:migrate' }]
+
+  demo.migrations.command.status:
+    class: Doctrine\Migrations\Tools\Console\Command\StatusCommand
+    arguments: ['@demo.migrations.dependency_factory', 'demo:migrate:status']
+    tags: [{ name: console.command, command: 'demo:migrate:status' }]
+
+  demo.migrations.command.generate:
+    class: Doctrine\Migrations\Tools\Console\Command\GenerateCommand
+    arguments: ['@demo.migrations.dependency_factory', 'demo:migrate:generate']
+    tags: [{ name: console.command, command: 'demo:migrate:generate' }]

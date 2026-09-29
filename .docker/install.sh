@@ -24,3 +24,6 @@ bin/console suitecrm:app:install -n \
 sed -i '/^DATABASE_URL=/d' .env.local
 
 .docker/configure-mail.sh
+
+# Demo data tracking table (extensions/demo); seeding stays manual: bin/console demo:seed
+bin/console demo:migrate -n
