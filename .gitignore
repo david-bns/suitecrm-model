@@ -1,0 +1,10 @@
+# Symfony cache
+/cache/
+
+# Logs (keep the directory structure)
+/logs/**
+!/logs/**/
+!/logs/**/.gitkeep
+
+# Legacy cache
+/public/legacy/cache/
