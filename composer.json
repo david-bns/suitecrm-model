@@ -22,7 +22,8 @@
       "php-http/discovery": true,
       "symfony/flex": true,
       "symfony/runtime": true,
-      "wikimedia/composer-merge-plugin": false
+      "wikimedia/composer-merge-plugin": false,
+      "phpstan/extension-installer": true
     },
     "audit": {
     }
@@ -160,6 +161,10 @@
     "friendsofphp/php-cs-fixer": "^3.9",
     "mikey179/vfsstream": "1.6.*",
     "mockery/mockery": "^1.1.0",
+    "phpstan/extension-installer": "^1.4.3",
+    "phpstan/phpstan": "^2.2.16",
+    "phpstan/phpstan-phpunit": "^2.0",
+    "phpstan/phpstan-symfony": "^2.0.20",
     "phpunit/php-code-coverage": "^10.1.16",
     "phpunit/php-file-iterator": "^4.1.0",
     "phpunit/php-text-template": "^3.0.1",

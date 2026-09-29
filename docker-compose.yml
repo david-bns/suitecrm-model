@@ -7,7 +7,7 @@
 #   docker compose up -d --build                               # installs vendor/ on first start
 #   docker compose exec -u www-data app .docker/install.sh    # first install
 #   docker compose exec -u www-data app bin/console demo:reset --seed   # demo data (extensions/demo)
-#   docker compose exec -u www-data app phpstan                  # static analysis (phpstan.neon)
+#   docker compose exec -u www-data app vendor/bin/phpstan       # static analysis (phpstan.neon)
 #
 # -> https://suitecrm-model.localhost
 # -> https://pma.suitecrm-model.localhost (phpMyAdmin)
@@ -40,6 +40,7 @@ services:
       PROXY_HOST: ${PROXY_HOST:-traefik}
       # Run .docker/composer-install.sh on start when vendor/ is missing
       COMPOSER_AUTO_INSTALL: "1"
+      COMPOSER_NO_DEV: ${COMPOSER_NO_DEV:-0}
       # Install parameters (.docker/install.sh)
       DB_NAME: ${DB_NAME:-suitecrm}
       DB_USER: ${DB_USER:-suitecrm}

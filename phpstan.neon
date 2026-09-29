@@ -1,5 +1,5 @@
 # Static analysis of the project's own code, not of SuiteCRM itself.
-#   docker compose exec -u www-data app phpstan
+#   docker compose exec -u www-data app vendor/bin/phpstan
 parameters:
     level: 6
     paths:

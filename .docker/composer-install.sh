@@ -5,8 +5,10 @@
 set -e
 cd /var/www/html
 
-composer install --no-dev --optimize-autoloader --no-interaction
+# Dev dependencies (phpunit, phpstan...) unless COMPOSER_NO_DEV=1, a variable
+# composer reads itself (set in the root .env).
+composer install --optimize-autoloader --no-interaction
 
 # The post-install cleanup (Google\Task\Composer::cleanup) removes unused Google
 # services after the autoloader was dumped: dump it again so it matches.
-composer dump-autoload --optimize --no-dev --no-interaction
+composer dump-autoload --optimize --no-interaction
