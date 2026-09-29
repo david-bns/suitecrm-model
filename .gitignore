@@ -1,3 +1,8 @@
+# Dependencies, installed by composer (.docker/composer-install.sh)
+/vendor/
+# Copied from vendor/ by the scrm:copy-legacy-assets composer script
+/public/legacy/vendor/
+
 # Symfony cache
 /cache/
 

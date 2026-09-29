@@ -26,6 +26,9 @@ RUN apt-get update \
 
 RUN a2enmod rewrite headers expires
 
+COPY --from=composer:2.8.12 /usr/bin/composer /usr/local/bin/composer
+ENV COMPOSER_HOME=/tmp/composer
+
 COPY apache/vhost.conf /etc/apache2/sites-available/000-default.conf
 COPY php/php.ini /usr/local/etc/php/conf.d/zz-suitecrm.ini
 

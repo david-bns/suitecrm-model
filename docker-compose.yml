@@ -4,7 +4,7 @@
 #
 # Configuration lives in the root .env (###> docker ### block), read automatically.
 #
-#   docker compose up -d --build
+#   docker compose up -d --build                               # installs vendor/ on first start
 #   docker compose exec -u www-data app .docker/install.sh    # first install
 #
 # -> https://suitecrm-model.localhost
@@ -36,6 +36,8 @@ services:
       # Traefik container name on the proxy network: loopback:443 is relayed to it
       # so PHP can call https://${PROJECT_HOST:-suitecrm-model.localhost} (see .docker/php/entrypoint.sh)
       PROXY_HOST: ${PROXY_HOST:-traefik}
+      # Run .docker/composer-install.sh on start when vendor/ is missing
+      COMPOSER_AUTO_INSTALL: "1"
       # Install parameters (.docker/install.sh)
       DB_NAME: ${DB_NAME:-suitecrm}
       DB_USER: ${DB_USER:-suitecrm}

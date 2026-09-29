@@ -11,6 +11,8 @@ if [ -f .env.local ]; then
     exit 1
 fi
 
+[ -f vendor/autoload.php ] || .docker/composer-install.sh
+
 bin/console suitecrm:app:install -n \
     -U "${DB_USER}" -P "${DB_PASSWORD}" -H db -Z 3306 -N "${DB_NAME}" \
     -u "${SUITECRM_ADMIN_USER}" -p "${SUITECRM_ADMIN_PASSWORD}" \
