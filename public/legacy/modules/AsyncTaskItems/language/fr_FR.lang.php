@@ -1,10 +1,7 @@
-<?php 
- //WARNING: The contents of this file are auto-generated
-
-
+<?php
 /**
  * SuiteCRM is a customer relationship management program developed by SuiteCRM Ltd.
- * Copyright (C) 2011 - 2025 SuiteCRM Ltd.
+ * Copyright (C) 2026 SuiteCRM Ltd.
  *
  * This program is free software; you can redistribute it and/or modify it under
  * the terms of the GNU Affero General Public License version 3 as published by the
@@ -28,11 +25,28 @@
  * the words "Supercharged by SuiteCRM".
  */
 
-if (!isset($hook_array) || !is_array($hook_array)) {
-    $hook_array = array();
+if (!defined('sugarEntry') || !sugarEntry) {
+    die('Not A Valid Entry Point');
 }
-if (!isset($hook_array['after_save']) || !is_array($hook_array['after_save'])) {
-    $hook_array['after_save'] = array();
-}
-$hook_array['after_save'][] = Array(99, 'AOW_Workflow', 'modules/AOW_WorkFlow/AOW_WorkFlow.php','AOW_WorkFlow', 'run_bean_flows');
-?>
+
+$mod_strings = [
+    'LBL_MODULE_NAME' => 'Async Task Items',
+    'LBL_MODULE_TITLE' => 'Async Task Items',
+    'LBL_LIST_FORM_TITLE' => 'Async Task Items List',
+    'LBL_SEARCH_FORM_TITLE' => 'Search Async Task Items',
+    'LBL_ID' => 'ID',
+    'LBL_NAME' => 'Nom',
+    'LBL_DATE_ENTERED' => 'Date de création',
+    'LBL_DATE_MODIFIED' => 'Date de modification',
+    'LBL_ASYNC_TASK_ID' => 'Async Task ID',
+    'LBL_ITEM_KEY' => 'Item Key',
+    'LBL_ITEM_NAME' => 'Item',
+    'LBL_ITEM_MODULE' => 'Item Module',
+    'LBL_STATUS' => 'Status',
+    'LBL_ERROR_MESSAGE' => 'Error Message',
+    'LBL_DATA' => 'Data',
+    'LBL_RESULT_DATA' => 'Result Data',
+    'LBL_SORT_ORDER' => 'Sort Order',
+    'LBL_RETRY_COUNT' => 'Retry Count',
+    'LBL_ATTACHMENTS' => 'Attachments',
+];
