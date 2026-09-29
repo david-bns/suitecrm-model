@@ -20,3 +20,5 @@ bin/console suitecrm:app:install -n \
 # defines it from the DB_* variables, so keep only the generated APP_SECRET.
 # (.env.local must stay: SuiteCRM checks its presence to know it is installed.)
 sed -i '/^DATABASE_URL=/d' .env.local
+
+.docker/configure-mail.sh

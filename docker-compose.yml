@@ -9,6 +9,7 @@
 #
 # -> https://suitecrm-model.localhost
 # -> https://pma.suitecrm-model.localhost (phpMyAdmin)
+# -> https://mail.suitecrm-model.localhost (Mailpit, catches every outgoing mail)
 
 name: ${PROJECT_NAME:-suitecrm-model}
 
@@ -43,6 +44,10 @@ services:
       SUITECRM_ADMIN_USER: ${SUITECRM_ADMIN_USER:-admin}
       SUITECRM_ADMIN_PASSWORD: ${SUITECRM_ADMIN_PASSWORD:-admin}
       SUITECRM_DEMO_DATA: ${SUITECRM_DEMO_DATA:-no}
+      SUITECRM_SMTP_HOST: ${SUITECRM_SMTP_HOST:-mailpit}
+      SUITECRM_SMTP_PORT: ${SUITECRM_SMTP_PORT:-1025}
+      SUITECRM_MAIL_FROM_ADDRESS: ${SUITECRM_MAIL_FROM_ADDRESS:-noreply@suitecrm-model.localhost}
+      SUITECRM_MAIL_FROM_NAME: ${SUITECRM_MAIL_FROM_NAME:-SuiteCRM}
     networks:
       - platform
       - internal
@@ -117,6 +122,21 @@ services:
       - traefik.http.routers.${PROJECT_NAME:-suitecrm-model}-pma.entrypoints=websecure
       - traefik.http.routers.${PROJECT_NAME:-suitecrm-model}-pma.tls=true
       - traefik.http.services.${PROJECT_NAME:-suitecrm-model}-pma.loadbalancer.server.port=80
+
+  mailpit:
+    image: ${MAILPIT_IMAGE:-axllent/mailpit:v1.29.4}
+    container_name: ${PROJECT_NAME:-suitecrm-model}-mailpit
+    restart: unless-stopped
+    networks:
+      - platform
+      - internal
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${PLATFORM_NETWORK:-docker-proxy_proxy}
+      - traefik.http.routers.${PROJECT_NAME:-suitecrm-model}-mail.rule=Host(`${MAILPIT_HOST:-mail.suitecrm-model.localhost}`)
+      - traefik.http.routers.${PROJECT_NAME:-suitecrm-model}-mail.entrypoints=websecure
+      - traefik.http.routers.${PROJECT_NAME:-suitecrm-model}-mail.tls=true
+      - traefik.http.services.${PROJECT_NAME:-suitecrm-model}-mail.loadbalancer.server.port=8025
 
 volumes:
   db-data:
