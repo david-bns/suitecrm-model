@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Tests of the project's own code (extensions/), not of SuiteCRM itself.
+      docker compose exec -u www-data app vendor/bin/phpunit
+-->
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+         bootstrap="vendor/autoload.php"
+         cacheDirectory="cache/phpunit"
+         colors="true"
+         failOnWarning="true"
+         failOnRisky="true"
+         beStrictAboutOutputDuringTests="true">
+    <testsuites>
+        <!-- Tests folders are named "Tests": SuiteCRM keeps those out of the service container -->
+        <testsuite name="unit">
+            <directory>extensions/*/Tests/Unit</directory>
+        </testsuite>
+    </testsuites>
+
+    <source>
+        <include>
+            <directory>extensions</directory>
+        </include>
+        <exclude>
+            <directory>extensions/defaultExt</directory>
+            <directory>extensions/*/Tests</directory>
+        </exclude>
+    </source>
+</phpunit>

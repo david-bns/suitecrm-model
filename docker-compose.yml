@@ -8,6 +8,7 @@
 #   docker compose exec -u www-data app .docker/install.sh    # first install
 #   docker compose exec -u www-data app bin/console demo:reset --seed   # demo data (extensions/demo)
 #   docker compose exec -u www-data app vendor/bin/phpstan       # static analysis (phpstan.neon)
+#   docker compose exec -u www-data app vendor/bin/phpunit       # unit tests (phpunit.xml.dist)
 #
 # -> https://suitecrm-model.localhost
 # -> https://pma.suitecrm-model.localhost (phpMyAdmin)
