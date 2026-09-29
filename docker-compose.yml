@@ -8,6 +8,7 @@
 #   docker compose exec -u www-data app .docker/install.sh    # first install
 #
 # -> https://suitecrm-model.localhost
+# -> https://pma.suitecrm-model.localhost (phpMyAdmin)
 
 name: ${PROJECT_NAME:-suitecrm-model}
 
@@ -93,6 +94,29 @@ services:
       retries: 20
     networks:
       - internal
+
+  pma:
+    image: ${PMA_IMAGE:-phpmyadmin:5.2.3}
+    container_name: ${PROJECT_NAME:-suitecrm-model}-pma
+    restart: unless-stopped
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ABSOLUTE_URI: https://${PMA_HOST:-pma.suitecrm-model.localhost}/
+      UPLOAD_LIMIT: 64M
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - platform
+      - internal
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${PLATFORM_NETWORK:-docker-proxy_proxy}
+      - traefik.http.routers.${PROJECT_NAME:-suitecrm-model}-pma.rule=Host(`${PMA_HOST:-pma.suitecrm-model.localhost}`)
+      - traefik.http.routers.${PROJECT_NAME:-suitecrm-model}-pma.entrypoints=websecure
+      - traefik.http.routers.${PROJECT_NAME:-suitecrm-model}-pma.tls=true
+      - traefik.http.services.${PROJECT_NAME:-suitecrm-model}-pma.loadbalancer.server.port=80
 
 volumes:
   db-data:
