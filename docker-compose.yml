@@ -1,0 +1,90 @@
+# SuiteCRM 8 behind the shared Traefik proxy (~/side-projects/docker-proxy).
+# Prerequisite: the proxy is running (network `docker-proxy_proxy`); after adding a hostname,
+# run `make cert@sync` there so the certificate covers it.
+#
+#   docker compose up -d --build                              # defaults below
+#   docker compose --env-file .docker/.env up -d --build      # custom values (.docker/.env.example)
+#
+# -> https://suitecrm-model.localhost
+
+name: ${PROJECT_NAME:-suitecrm-model}
+
+x-app: &app
+  build:
+    context: .docker
+    dockerfile: php/Dockerfile
+    args:
+      UID: ${UID:-1000}
+      GID: ${GID:-1000}
+  image: ${PROJECT_NAME:-suitecrm-model}-php:8.3
+  volumes:
+    - .:/var/www/html
+  depends_on:
+    db:
+      condition: service_healthy
+
+services:
+  app:
+    <<: *app
+    container_name: ${PROJECT_NAME:-suitecrm-model}
+    restart: unless-stopped
+    networks:
+      - platform
+      - internal
+    labels:
+      - traefik.enable=true
+      - traefik.docker.network=${PLATFORM_NETWORK:-docker-proxy_proxy}
+      - traefik.http.routers.${PROJECT_NAME:-suitecrm-model}.rule=Host(`${PROJECT_HOST:-suitecrm-model.localhost}`)
+      - traefik.http.routers.${PROJECT_NAME:-suitecrm-model}.entrypoints=websecure
+      - traefik.http.routers.${PROJECT_NAME:-suitecrm-model}.tls=true
+      - traefik.http.routers.${PROJECT_NAME:-suitecrm-model}.middlewares=${PROJECT_NAME:-suitecrm-model}-headers
+      - traefik.http.services.${PROJECT_NAME:-suitecrm-model}.loadbalancer.server.port=80
+      # Same as secure-headers@file, but SAMEORIGIN instead of DENY:
+      # SuiteCRM 8 renders legacy (classic) views inside a same-origin iframe.
+      - traefik.http.middlewares.${PROJECT_NAME:-suitecrm-model}-headers.headers.customFrameOptionsValue=SAMEORIGIN
+      - traefik.http.middlewares.${PROJECT_NAME:-suitecrm-model}-headers.headers.contentTypeNosniff=true
+      - traefik.http.middlewares.${PROJECT_NAME:-suitecrm-model}-headers.headers.browserXssFilter=true
+      - traefik.http.middlewares.${PROJECT_NAME:-suitecrm-model}-headers.headers.referrerPolicy=strict-origin-when-cross-origin
+      - traefik.http.middlewares.${PROJECT_NAME:-suitecrm-model}-headers.headers.stsSeconds=31536000
+      - traefik.http.middlewares.${PROJECT_NAME:-suitecrm-model}-headers.headers.stsIncludeSubdomains=true
+
+  cron:
+    <<: *app
+    container_name: ${PROJECT_NAME:-suitecrm-model}-cron
+    restart: unless-stopped
+    user: www-data
+    working_dir: /var/www/html/public/legacy
+    command: ["sh", "-c", "while true; do [ -f config.php ] && php -f cron.php > /dev/null 2>&1; sleep 60; done"]
+    networks:
+      - internal
+
+  db:
+    image: ${DB_IMAGE:-mariadb:10.11.9}
+    container_name: ${PROJECT_NAME:-suitecrm-model}-db
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${DB_NAME:-suitecrm}
+      MARIADB_USER: ${DB_USER:-suitecrm}
+      MARIADB_PASSWORD: ${DB_PASSWORD:-suitecrm}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root}
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_general_ci"]
+    volumes:
+      - db-data:/var/lib/mysql
+    ports:
+      - "127.0.0.1:${DB_HOST_PORT:-33061}:3306"
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - internal
+
+volumes:
+  db-data:
+
+networks:
+  internal:
+  platform:
+    external: true
+    name: ${PLATFORM_NETWORK:-docker-proxy_proxy}
