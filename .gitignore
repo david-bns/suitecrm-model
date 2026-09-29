@@ -13,3 +13,9 @@
 /.env.local
 /public/legacy/config.php
 /public/legacy/config_si.php
+
+# Install markers and generated rewrite rules
+/.installed_checked
+/public/legacy/.installed_checked
+/public/legacy/install/status.json
+/public/legacy/.htaccess
